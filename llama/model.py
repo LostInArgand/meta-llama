@@ -2,6 +2,7 @@
 # This software may be used and distributed according to the terms of the Llama 2 Community License Agreement.
 
 import math
+import nvtx
 from dataclasses import dataclass
 from typing import Optional, Tuple
 
@@ -277,7 +278,9 @@ class Attention(nn.Module):
         xk = xk.view(bsz, seqlen, self.n_local_kv_heads, self.head_dim)
         xv = xv.view(bsz, seqlen, self.n_local_kv_heads, self.head_dim)
 
+        start = nvtx.start_range(message="RoPE", color="blue")
         xq, xk = apply_rotary_emb(xq, xk, freqs_cis=freqs_cis)
+        novtx.end_range(start)
 
         self.cache_k = self.cache_k.to(xq)
         self.cache_v = self.cache_v.to(xq)
